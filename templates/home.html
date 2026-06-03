@@ -1,4 +1,4 @@
-<DOCTYPE!>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Home</title>
@@ -9,6 +9,13 @@
 
     <p>
         This is the home page. You can add more content here later.
-    </p>        
+    </p>    
+    <h2>Welcome {{ user.username }}</h2>
+    <a href="{% url 'view_profile'%}">
+        view_profile
+    <a>
+    <a href="{% url 'logout' %}">
+        Logout
+    </a>    
 </body>
 </html>

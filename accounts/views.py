@@ -4,12 +4,15 @@ from django.shortcuts import render,redirect
 from .forms import UserRegistrationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from accounts.models import Profile
+from .forms import ProfileUpdateForm
 
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
             return redirect('login')
     else:
         form = UserRegistrationForm()
@@ -20,6 +23,7 @@ def user_login(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            Profile.objects.get_or_create(user=user)  # Create profile if it doesn't exist
             login(request, user)
             return redirect('home')
     else:
@@ -28,3 +32,22 @@ def user_login(request):
 
 def home(request):
     return render(request, 'home.html')
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def view_profile(request):
+    return render(request, 'accounts/view_profile.html',{'profile': request.user.profile})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = ProfileUpdateForm(instance=request.user.profile)
+    return render(request, 'accounts/edit_profile.html', {'form': form})
