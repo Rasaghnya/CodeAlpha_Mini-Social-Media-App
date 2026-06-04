@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 
 # Create your views here.
 from .forms import UserRegistrationForm
@@ -51,3 +51,21 @@ def edit_profile(request):
     else:
         form = ProfileUpdateForm(instance=request.user.profile)
     return render(request, 'accounts/edit_profile.html', {'form': form})
+
+
+@login_required
+def follow_user(request, user_id):
+    profile_to_follow = get_object_or_404(Profile, id=user_id)
+    if request.user == profile_to_follow.user:
+        return redirect('view_profile')  # Can't follow yourself
+    if request.user in profile_to_follow.followers.all():
+        profile_to_follow.followers.remove(request.user)
+    else: 
+        profile_to_follow.followers.add(request.user)
+    return redirect('profile_detail', user_id=user_id)
+
+@login_required
+def profile_detail(request, user_id):
+    profile = get_object_or_404(Profile, id=user_id)
+    is_following = request.user in profile.followers.all()
+    return render(request, 'accounts/profile_detail.html', {'profile': profile, 'is_following': is_following})

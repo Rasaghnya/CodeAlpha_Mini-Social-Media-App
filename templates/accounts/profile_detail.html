@@ -1,0 +1,36 @@
+<h2>{{ profile.user.username }}</h2>
+
+{% if profile.profile_picture %}
+    <img src="{{ profile.profile_picture.url }}" width="150">
+{% endif %}
+
+<p><strong>Bio:</strong> {{ profile.bio }}</p>
+<p><strong>Location:</strong> {{ profile.location }}</p>
+
+{% if profile.website %}
+    <p>
+        <a href="{{ profile.website }}">
+            {{ profile.website }}
+        </a>
+    </p>
+{% endif %}
+
+<p><strong>Followers:</strong> {{ profile.followers_count }}</p>
+<p><strong>Following:</strong> {{ profile.following_count }}</p>
+
+{% if request.user != profile.user %}
+<form method="POST"
+      action="{% url 'follow_user' profile.id %}">
+    {% csrf_token %}
+
+    {% if request.user in profile.followers.all %}
+        <button type="submit">
+            Unfollow
+        </button>
+    {% else %}
+        <button type="submit">
+            Follow
+        </button>
+    {% endif %}
+</form>
+{% endif %}
